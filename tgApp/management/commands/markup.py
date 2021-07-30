@@ -25,18 +25,9 @@ def markup_genre():
     size = 2
     for i in Genre.objects.all():
         btn_list.append(types.InlineKeyboardButton(i.name, callback_data='genre' + str(i.id)))
-    markup = example(btn_list, size)
+    markup = types.InlineKeyboardMarkup()
+    for i in btn_list:
+        markup.add(i)
     return markup
 
 
-def markup_sub(id):
-    btn_list = []
-    size = 2
-    user = Profile.objects.get(external_id=id)
-    genres = user.genre.all()
-    for genre in genres:
-        subgenres = genre.subgenre.all()
-        for subgenre in subgenres:
-            btn_list.append(types.InlineKeyboardButton(subgenre.name, callback_data='subgenre' + str(subgenre.id)))
-    markup_sub = example(btn_list, size)
-    return markup_sub

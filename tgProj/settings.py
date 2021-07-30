@@ -51,11 +51,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'tgProj.urls'
-
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR,],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,5 +122,5 @@ STATIC_URL = '/static/'
 
 
 ADMIN_ID=700904990
-BOT_TOKEN='1340385330:AAEuzVzMjiX3E1F92nhTw9IPizmR-z7srZQ'
+BOT_TOKEN='1340385330:AAGpsOtKDp_CKGxedsTHorpDIHE2SojQAC4'
 ip='localhost'

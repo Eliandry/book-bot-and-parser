@@ -12,9 +12,7 @@ class Profile(admin.ModelAdmin):
 class GenreAdmin(admin.ModelAdmin):
     list_display = ('id','name')
 
-@admin.register(Subgenre)
-class SubGenreAdmin(admin.ModelAdmin):
-    list_display = ('id','name')
+
 
 
 @admin.register(Book)
