@@ -22,12 +22,18 @@ def example(list, size):
 
 def markup_genre():
     btn_list = []
-    size = 2
     for i in Genre.objects.all():
         btn_list.append(types.InlineKeyboardButton(i.name, callback_data='genre' + str(i.id)))
     markup = types.InlineKeyboardMarkup()
     for i in btn_list:
         markup.add(i)
     return markup
-
-
+def markup_prof_genre(message):
+    prof = Profile.objects.get(name=message.from_user.username)
+    btn_list = []
+    for i in prof.genre.all():
+        btn_list.append(types.InlineKeyboardButton(i.name, callback_data='prof_genre' + str(i.id)))
+    markup = types.InlineKeyboardMarkup()
+    for i in btn_list:
+        markup.add(i)
+    return markup

@@ -3,7 +3,7 @@ import telebot
 from tgApp.models import *
 from telebot import types
 import re
-from .markup import markup_genre
+from .markup import markup_genre,markup_prof_genre
 
 
 class Command(BaseCommand):
@@ -51,7 +51,21 @@ class Command(BaseCommand):
             for i in prof.genre.all():
                f.append(i.name)
             str_a = ' '.join(f)
-            bot.send_message(message.chat.id, f'Имя: {message.from_user.username}, '
-                                              f'Любимые жанры: {str_a}')
+            bot.send_message(message.chat.id, f'Имя: {message.from_user.username} \nЛюбимые жанры: {str_a}'
+                                              f'\nЧтобы изменить введите /ch')
+
+        @bot.message_handler(commands=['ch'])
+        def change(message):
+            bot.send_message(message.chat.id,'Выберите жанры которые нужно удалить',reply_markup=markup_prof_genre(message))
+
+        @bot.callback_query_handler(lambda c: c.data and c.data.startswith('prof_genre'))
+        def callback(callback_query: types.CallbackQuery):
+            user = Profile.objects.get(external_id=callback_query.from_user.id)
+            s = callback_query.data
+            nums = re.findall(r'\d+', s)
+            nums = [int(i) for i in nums]
+            genre=user.genre.get(id=nums[0])
+            user.genre.remove(genre)
+
 
         bot.polling()
