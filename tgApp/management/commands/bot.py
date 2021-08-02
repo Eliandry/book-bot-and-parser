@@ -1,11 +1,13 @@
+from time import sleep
+import random
 from django.core.management.base import BaseCommand
 import telebot
 from tgApp.models import *
 from telebot import types
 import re
 from .markup import markup_genre,markup_prof_genre
-
-
+import schedule
+from threading import Thread
 class Command(BaseCommand):
     help = 'Телеграм-бот'
 
@@ -67,5 +69,35 @@ class Command(BaseCommand):
             genre=user.genre.get(id=nums[0])
             user.genre.remove(genre)
 
+        @bot.message_handler(commands=['book'])
+        def book(message):
+            prof=Profile.objects.get(name=message.from_user.username)
+            books=Book.objects.all()
+            book_list=[]
+            for i in range(5):
+                obj=random.choice(prof.genre.all())
+                x=books.filter(genre=obj)
+                b=random.choice(x)
+                book_list.append(b)
+            book_set=set(book_list)
+            for i in book_set:
+                bot.send_message(message.chat.id, f'Название: {i.name}\n'
+                                                  f'Автор: {i.author}\n'
+                                                  f'Описание: {i.description}\n'
+                                                  f'Читать: {i.url}\n')
 
+
+
+
+
+        def schedule_checker():
+            while True:
+                schedule.run_pending()
+                sleep(1)
+
+        def function_to_run(message):
+            return bot.send_message(message.chat.id, "This is a message to send.")
+        if __name__ == "__main__":
+            schedule.every().saturday.at("12:00").do(function_to_run())
+            Thread(target=schedule_checker).start()
         bot.polling()
