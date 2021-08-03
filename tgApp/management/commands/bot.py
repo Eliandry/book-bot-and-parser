@@ -81,9 +81,18 @@ class Command(BaseCommand):
                 book_list.append(b)
             book_set=set(book_list)
             for i in book_set:
+                genre_list=[]
+                for k in i.genre.all():
+                    genre_list.append(k.name)
+                    genre = ' '.join(genre_list)
                 bot.send_message(message.chat.id, f'Название: {i.name}\n'
+                                                  f'\n'
                                                   f'Автор: {i.author}\n'
+                                                  f'\n'
+                                                  f'Жанры: {genre}\n'
+                                                  f'\n'
                                                   f'Описание: {i.description}\n'
+                                                  f'\n'
                                                   f'Читать: {i.url}\n')
 
 
