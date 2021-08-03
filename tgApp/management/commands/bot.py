@@ -85,6 +85,13 @@ class Command(BaseCommand):
                 for k in i.genre.all():
                     genre_list.append(k.name)
                     genre = ' '.join(genre_list)
+
+                markup = types.InlineKeyboardMarkup()
+                lib=types.InlineKeyboardButton('Читать', callback_data='lib' + str(i.id))
+                markup.add(lib)
+                dont = types.InlineKeyboardButton('Не нравится', callback_data='delete' + str(i.id))
+                markup.add(dont)
+
                 bot.send_message(message.chat.id, f'Название: {i.name}\n'
                                                   f'\n'
                                                   f'Автор: {i.author}\n'
@@ -93,12 +100,25 @@ class Command(BaseCommand):
                                                   f'\n'
                                                   f'Описание: {i.description}\n'
                                                   f'\n'
-                                                  f'Читать: {i.url}\n')
+                                                  f'Читать: {i.url}\n',reply_markup=markup)
 
+        @bot.callback_query_handler(lambda c: c.data and c.data.startswith('lib'))
+        def callback(callback_query: types.CallbackQuery):
+            user = Profile.objects.get(external_id=callback_query.from_user.id)
+            s = callback_query.data
+            nums = re.findall(r'\d+', s)
+            nums = [int(i) for i in nums]
+            bk=Book.objects.get(id=nums[0])
+            user.library.add(bk)
 
-
-
-
+        @bot.callback_query_handler(lambda c: c.data and c.data.startswith('delete'))
+        def callback(callback_query: types.CallbackQuery):
+            user = Profile.objects.get(external_id=callback_query.from_user.id)
+            s = callback_query.data
+            nums = re.findall(r'\d+', s)
+            nums = [int(i) for i in nums]
+            bk = Book.objects.get(id=nums[0])
+            user.badbook.add(bk)
         def schedule_checker():
             while True:
                 schedule.run_pending()
