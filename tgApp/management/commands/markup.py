@@ -19,7 +19,15 @@ def example(list, size):
             markup.add(part[0])
     return markup
 
+def markup_board():
+    markup = types.ReplyKeyboardMarkup()
+    buttonA = types.KeyboardButton('/profile')
+    buttonB = types.KeyboardButton('/choice')
+    buttonC = types.KeyboardButton('/book')
 
+    markup.row(buttonA, buttonB)
+    markup.row(buttonC)
+    return markup
 def markup_genre():
     btn_list = []
     for i in Genre.objects.all():

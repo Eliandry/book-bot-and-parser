@@ -5,7 +5,7 @@ import telebot
 from tgApp.models import *
 from telebot import types
 import re
-from .markup import markup_genre,markup_prof_genre
+from .markup import markup_genre,markup_prof_genre,markup_board
 import schedule
 from threading import Thread
 class Command(BaseCommand):
@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         bot = telebot.TeleBot('1340385330:AAGpsOtKDp_CKGxedsTHorpDIHE2SojQAC4')
 
-        @bot.message_handler(commands=['start'])
+        @bot.message_handler(commands=['start','help'])
         def start_message(message):
             p, _ = Profile.objects.get_or_create(
                 external_id=message.chat.id,
@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 }
             )
             bot.send_message(message.chat.id, f'Поздравляю, {message.from_user.username}, вы зарегестрированы! '
-                                              f'Для начала выберите ваши любимые жанры /choice')
+                                              f'Для начала выберите ваши любимые жанры /choice',reply_markup=markup_board())
 
         @bot.message_handler(commands=['choice'])
         def choise(message):
@@ -101,7 +101,8 @@ class Command(BaseCommand):
                                                   f'Описание: {i.description}\n'
                                                   f'\n'
                                                   f'Читать: {i.url}\n',reply_markup=markup)
-
+            bot.send_message(message.chat.id, 'Выберите книгу и нажмите читать\n'
+                                              'Когда прочитаете эту книгу введите /library и оставьте отзыв')
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('lib'))
         def callback(callback_query: types.CallbackQuery):
             user = Profile.objects.get(external_id=callback_query.from_user.id)
@@ -111,6 +112,33 @@ class Command(BaseCommand):
             bk=Book.objects.get(id=nums[0])
             user.library.add(bk)
 
+
+        @bot.message_handler(commands=['library'])
+        def library(message):
+            prof = Profile.objects.get(name=message.from_user.username)
+            libr=prof.library.all()
+            for i in libr:
+                markup = types.InlineKeyboardMarkup()
+                lib = types.InlineKeyboardButton('Нравится', callback_data='like' + str(i.id))
+                markup.add(lib)
+                dont = types.InlineKeyboardButton('Не нравится', callback_data='delete' + str(i.id))
+                markup.add(dont)
+                bot.send_message(message.chat.id, f'Название: {i.name}\n'
+                                                  f'\n'
+                                                  f'Автор: {i.author}\n'
+                                                  f'\n'
+                                                  f'Читать: {i.url}\n')
+
+        @bot.callback_query_handler(lambda c: c.data and c.data.startswith('like'))
+        def callback(callback_query: types.CallbackQuery):
+            user = Profile.objects.get(external_id=callback_query.from_user.id)
+            s = callback_query.data
+            nums = re.findall(r'\d+', s)
+            nums = [int(i) for i in nums]
+            bk = Book.objects.get(id=nums[0])
+            user.goodbook.add(bk)
+
+            
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('delete'))
         def callback(callback_query: types.CallbackQuery):
             user = Profile.objects.get(external_id=callback_query.from_user.id)
@@ -119,6 +147,7 @@ class Command(BaseCommand):
             nums = [int(i) for i in nums]
             bk = Book.objects.get(id=nums[0])
             user.badbook.add(bk)
+
         def schedule_checker():
             while True:
                 schedule.run_pending()
