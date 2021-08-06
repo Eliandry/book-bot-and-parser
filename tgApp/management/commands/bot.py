@@ -74,11 +74,22 @@ class Command(BaseCommand):
             prof=Profile.objects.get(name=message.from_user.username)
             books=Book.objects.all()
             book_list=[]
-            for i in range(5):
+            for i in range(4):
                 obj=random.choice(prof.genre.all())
                 x=books.filter(genre=obj)
                 b=random.choice(x)
                 book_list.append(b)
+
+            random_book=random.choice(books)
+            book_list.append(random_book)
+            try:
+                sss = random.choice(prof.goodbook.all())
+                c=books.filter(author=sss.author)
+                end=random.choice(c)
+                if not prof.library.filter(id=end.id).exists():
+                    book_list.append(end)
+            except:
+                pass
             book_set=set(book_list)
             for i in book_set:
                 genre_list=[]
@@ -127,7 +138,7 @@ class Command(BaseCommand):
                                                   f'\n'
                                                   f'Автор: {i.author}\n'
                                                   f'\n'
-                                                  f'Читать: {i.url}\n')
+                                                  f'Читать: {i.url}\n',reply_markup=markup)
 
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('like'))
         def callback(callback_query: types.CallbackQuery):
@@ -138,7 +149,7 @@ class Command(BaseCommand):
             bk = Book.objects.get(id=nums[0])
             user.goodbook.add(bk)
 
-            
+
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('delete'))
         def callback(callback_query: types.CallbackQuery):
             user = Profile.objects.get(external_id=callback_query.from_user.id)
