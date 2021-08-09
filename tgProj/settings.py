@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-
+from config import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -121,6 +121,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-ADMIN_ID=700904990
-BOT_TOKEN='1340385330:AAGpsOtKDp_CKGxedsTHorpDIHE2SojQAC4'
-ip='localhost'
+ADMIN_ID=ADMIN_ID
+BOT_TOKEN=BOT_TOKEN
+ip=ip

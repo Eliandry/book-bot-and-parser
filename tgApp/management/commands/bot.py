@@ -1,5 +1,4 @@
-from tgProj import settings
-import time
+from config import BOT_TOKEN
 import random
 from django.core.management.base import BaseCommand
 import telebot
@@ -11,7 +10,7 @@ import schedule
 class Command(BaseCommand):
     help = 'Телеграм-бот'
     def handle(self, *args, **options):
-        bot = telebot.TeleBot('1340385330:AAGpsOtKDp_CKGxedsTHorpDIHE2SojQAC4')
+        bot = telebot.TeleBot(BOT_TOKEN)
 
         @bot.message_handler(commands=['start','help'])
         def start_message(message):
@@ -21,7 +20,8 @@ class Command(BaseCommand):
                     'name': message.from_user.username,
                 }
             )
-            bot.send_message(message.chat.id, f'Поздравляю, {message.from_user.username}, вы зарегестрированы! '
+            p.save()
+            bot.send_message(message.chat.id, f'Поздравляю, вы зарегестрированы! '
                                               f'Для начала выберите ваши любимые жанры /choice',reply_markup=markup_board())
 
         @bot.message_handler(commands=['choice'])
@@ -158,5 +158,6 @@ class Command(BaseCommand):
             bk = Book.objects.get(id=nums[0])
             user.badbook.add(bk)
 
+        bot.polling()
 
 
