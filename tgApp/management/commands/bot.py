@@ -1,4 +1,5 @@
-from time import sleep
+from tgProj import settings
+import time
 import random
 from django.core.management.base import BaseCommand
 import telebot
@@ -7,10 +8,8 @@ from telebot import types
 import re
 from .markup import markup_genre,markup_prof_genre,markup_board
 import schedule
-from threading import Thread
 class Command(BaseCommand):
     help = 'Телеграм-бот'
-
     def handle(self, *args, **options):
         bot = telebot.TeleBot('1340385330:AAGpsOtKDp_CKGxedsTHorpDIHE2SojQAC4')
 
@@ -28,9 +27,10 @@ class Command(BaseCommand):
         @bot.message_handler(commands=['choice'])
         def choise(message):
 
-            bot.send_message(message.chat.id, 'Выберите ваши любимые жанры (max 25). Когда закончите введите /next',
+            bot.send_message(message.chat.id, 'Выберите жанры :',
                              reply_markup=markup_genre())
-
+            bot.send_message(message.chat.id,'Выберите ваши любимые жанры (max 25). Когда закончите введите /next\n'
+                                             'Просто нажимайте на жанры,они сохраняются автоматически')
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('genre'))
         def callback(callback_query: types.CallbackQuery):
             user = Profile.objects.get(external_id=callback_query.from_user.id)
@@ -98,7 +98,7 @@ class Command(BaseCommand):
                     genre = ' '.join(genre_list)
 
                 markup = types.InlineKeyboardMarkup()
-                lib=types.InlineKeyboardButton('Читать', callback_data='lib' + str(i.id))
+                lib=types.InlineKeyboardButton('Добавить в библиотеку', callback_data='lib' + str(i.id))
                 markup.add(lib)
                 dont = types.InlineKeyboardButton('Не нравится', callback_data='delete' + str(i.id))
                 markup.add(dont)
@@ -112,7 +112,7 @@ class Command(BaseCommand):
                                                   f'Описание: {i.description}\n'
                                                   f'\n'
                                                   f'Читать: {i.url}\n',reply_markup=markup)
-            bot.send_message(message.chat.id, 'Выберите книгу и нажмите читать\n'
+            bot.send_message(message.chat.id, 'Выберите книгу и добавьте в библиотеку\n'
                                               'Когда прочитаете эту книгу введите /library и оставьте отзыв')
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('lib'))
         def callback(callback_query: types.CallbackQuery):
@@ -122,7 +122,6 @@ class Command(BaseCommand):
             nums = [int(i) for i in nums]
             bk=Book.objects.get(id=nums[0])
             user.library.add(bk)
-
 
         @bot.message_handler(commands=['library'])
         def library(message):
@@ -159,14 +158,5 @@ class Command(BaseCommand):
             bk = Book.objects.get(id=nums[0])
             user.badbook.add(bk)
 
-        def schedule_checker():
-            while True:
-                schedule.run_pending()
-                sleep(1)
 
-        def function_to_run(message):
-            return bot.send_message(message.chat.id, "This is a message to send.")
-        if __name__ == "__main__":
-            schedule.every().saturday.at("12:00").do(function_to_run())
-            Thread(target=schedule_checker).start()
-        bot.polling()
+

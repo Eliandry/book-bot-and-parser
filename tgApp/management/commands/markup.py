@@ -1,26 +1,23 @@
-from django.core.management.base import BaseCommand
 import telebot
 from tgApp.models import *
 from telebot import types
-import re
 
 
-def example(list, size):
-    btn_list = list
-
-    markup = types.InlineKeyboardMarkup(size)
-    for i in range(0, len(btn_list), size):
-        part = btn_list[i:i + size]
-        if len(part) == 3:
-            markup.add(part[0], part[1], part[2])
-        elif len(part) == 2:
-            markup.add(part[0], part[1])
-        else:
-            markup.add(part[0])
-    return markup
-
+def example(list, size,call):
+    buttons_in_row = size
+    buttons_added = []
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    keyboard.row_width =3
+    for timeslot in list:
+        buttons_added.append(telebot.types.InlineKeyboardButton(timeslot.name, callback_data=call + str(timeslot.id)))
+        if len(buttons_added) == buttons_in_row:
+            keyboard.add(*buttons_added)
+            buttons_added = []
+    if buttons_added:
+        print(*buttons_added)
+    return keyboard
 def markup_board():
-    markup = types.ReplyKeyboardMarkup()
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     buttonA = types.KeyboardButton('/profile')
     buttonB = types.KeyboardButton('/choice')
     buttonC = types.KeyboardButton('/book')
@@ -29,19 +26,11 @@ def markup_board():
     markup.row(buttonC)
     return markup
 def markup_genre():
-    btn_list = []
-    for i in Genre.objects.all():
-        btn_list.append(types.InlineKeyboardButton(i.name, callback_data='genre' + str(i.id)))
-    markup = types.InlineKeyboardMarkup()
-    for i in btn_list:
-        markup.add(i)
+    i= Genre.objects.all()
+    markup=example(i,3,'genre')
     return markup
 def markup_prof_genre(message):
     prof = Profile.objects.get(name=message.from_user.username)
-    btn_list = []
-    for i in prof.genre.all():
-        btn_list.append(types.InlineKeyboardButton(i.name, callback_data='prof_genre' + str(i.id)))
-    markup = types.InlineKeyboardMarkup()
-    for i in btn_list:
-        markup.add(i)
+    alls= prof.genre.all()
+    markup=example(alls,2,'prof_genre')
     return markup
