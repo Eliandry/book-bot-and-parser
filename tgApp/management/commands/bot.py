@@ -30,7 +30,7 @@ class Command(BaseCommand):
             bot.send_message(message.chat.id, 'Выберите жанры :',
                              reply_markup=markup_genre())
             bot.send_message(message.chat.id,'Выберите ваши любимые жанры (max 25). Когда закончите введите /next\n'
-                                             'Просто нажимайте на жанры,они сохраняются автоматически')
+                                             '(Просто нажимайте на жанры,они сохраняются автоматически)')
         @bot.callback_query_handler(lambda c: c.data and c.data.startswith('genre'))
         def callback(callback_query: types.CallbackQuery):
             user = Profile.objects.get(external_id=callback_query.from_user.id)
@@ -42,7 +42,7 @@ class Command(BaseCommand):
             if user.genre.count() > 25:
                 bot.answer_callback_query(callback_query.id)
                 bot.send_message(callback_query.from_user.id,
-                                 'Вы выбрали достаточно жанров. Введите /next')
+                                 'Вы выбрали достаточно жанров. Введите /book')
                 return
             user.genre.add(genre)
 
@@ -159,5 +159,6 @@ class Command(BaseCommand):
             user.badbook.add(bk)
 
         bot.polling()
+
 
 
